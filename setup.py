@@ -13,7 +13,7 @@ https://python-libevdev.readthedocs.io/en/latest/
 
 # When bumping the version, also bump it doc/source/conf.py
 setup(name='libevdev',
-      version='0.7',
+      version='0.8',
       description='Python wrapper for libevdev',
       long_description=long_description,
       author='Peter Hutterer',
@@ -21,7 +21,7 @@ setup(name='libevdev',
       url='https://gitlab.freedesktop.org/libevdev/python-libevdev',
       packages=['libevdev'],
       classifiers=[
-           'Development Status :: 3 - Alpha',
+           'Development Status :: 4 - Beta',
            'Topic :: Software Development',
            'Intended Audience :: Developers',
            'License :: OSI Approved :: MIT License',
