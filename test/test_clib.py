@@ -76,6 +76,21 @@ class TestNameConversion(unittest.TestCase):
         with self.assertRaises(ctypes.ArgumentError):
             name = Libevdev.event_to_name(0, "foo")
 
+    def test_value_to_name(self):
+        name = Libevdev.event_to_name(3, 0x37, 0)
+        self.assertEqual(name, "MT_TOOL_FINGER")
+
+        name = Libevdev.event_to_name(3, 0x37, 1)
+        self.assertEqual(name, "MT_TOOL_PEN")
+
+    def test_value_to_name_invalid(self):
+        name = Libevdev.event_to_name(3, 0x37, 1000)
+        self.assertIsNone(name)
+        name = Libevdev.event_to_name(3, 0x37, -1)
+        self.assertIsNone(name)
+        with self.assertRaises(ctypes.ArgumentError):
+            name = Libevdev.event_to_name(0, "foo")
+
     def test_type_to_value(self):
         v = Libevdev.event_to_value("EV_REL")
         self.assertEqual(v, 2)
