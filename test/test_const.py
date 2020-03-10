@@ -108,3 +108,6 @@ class TestEventBits(unittest.TestCase):
 
         for p in libevdev.props:
             self.assertEqual(propbit(p.value), p)
+
+    def test_repr(self):
+        self.assertEqual(str(libevdev.EV_REL), 'EV_REL:2')
