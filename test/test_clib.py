@@ -102,24 +102,24 @@ class TestNameConversion(unittest.TestCase):
         with self.assertRaises(ctypes.ArgumentError):
             name = Libevdev.event_to_name(0, "foo")
 
-    def test_type_to_value(self):
+    def test_event_type_to_value(self):
         v = Libevdev.event_to_value("EV_REL")
         self.assertEqual(v, 2)
 
-    def test_type_value_invalid(self):
+    def test_event_type_to_value_invalid(self):
         v = Libevdev.event_to_value("foo")
         self.assertIsNone(v)
         with self.assertRaises(AttributeError):
             v = Libevdev.event_to_value(0)
 
-    def test_code_value(self):
+    def test_event_code_to_value(self):
         v = Libevdev.event_to_value("EV_REL", "REL_Y")
         self.assertEqual(v, 1)
 
         v = Libevdev.event_to_value(0, "SYN_DROPPED")
         self.assertEqual(v, 3)
 
-    def test_code_value_invalid(self):
+    def test_event_code_to_value_invalid(self):
         v = Libevdev.event_to_value("EV_REL", "KEY_ESC")
         self.assertIsNone(v)
 
