@@ -53,3 +53,9 @@ class TestEvents(unittest.TestCase):
         e2 = InputEvent(libevdev.EV_REL.REL_Y)
         self.assertNotEqual(e2, e1)
         self.assertNotEqual(e1, e2)
+
+    def test_event_matches_invalid(self):
+        e1 = InputEvent(libevdev.EV_REL.REL_X)
+        self.assertNotEqual(e1, 0)
+        self.assertNotEqual(e1, None)
+        self.assertNotEqual(e1, 'foo')
