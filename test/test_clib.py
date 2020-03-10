@@ -477,6 +477,13 @@ class TestAbsDevice(unittest.TestCase):
         dev.disable("EV_ABS", "ABS_RY")
         self.assertFalse(dev.has_event("EV_ABS", "ABS_RY"))
 
+        data = 1
+        self.assertFalse(dev.has_event("EV_REP", "REP_DELAY"))
+        dev.enable("EV_REP", "REP_DELAY", data)
+        self.assertTrue(dev.has_event("EV_REP", "REP_DELAY"))
+        dev.disable("EV_REP", "REP_DELAY")
+        self.assertFalse(dev.has_event("EV_REP", "REP_DELAY"))
+
     @unittest.skipUnless(is_root(), 'Test requires root')
     def test_enable_property(self):
         dev = Libevdev(self.fd)
