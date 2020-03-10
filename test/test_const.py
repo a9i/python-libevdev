@@ -111,3 +111,6 @@ class TestEventBits(unittest.TestCase):
 
     def test_repr(self):
         self.assertEqual(str(libevdev.EV_REL), 'EV_REL:2')
+
+    def test_less_than(self):
+        self.assertTrue(libevdev.EV_REL < libevdev.EV_ABS)
