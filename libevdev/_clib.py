@@ -690,8 +690,9 @@ class Libevdev(_LibraryWrapper):
         if event_code is not None and event_value is not None:
             if not isinstance(event_type, int):
                 event_type = cls.event_to_value(event_type)
-            v = cls._event_value_from_name(event_type,
-                                           event_code.encode("iso8859-1"),
+            if not isinstance(event_code, int):
+                event_code = cls.event_to_value(event_type, event_code)
+            v = cls._event_value_from_name(event_type, event_code,
                                            event_value.encode("iso8859-1"))
         elif event_code is not None:
             if not isinstance(event_type, int):

@@ -123,6 +123,17 @@ class TestNameConversion(unittest.TestCase):
         v = Libevdev.event_to_value("EV_REL", "KEY_ESC")
         self.assertIsNone(v)
 
+    def test_event_value_to_value(self):
+        v = Libevdev.event_to_value("EV_ABS", "ABS_MT_TOOL_TYPE", "MT_TOOL_FINGER")
+        self.assertEqual(v, 0)
+
+        v = Libevdev.event_to_value("EV_ABS", "ABS_MT_TOOL_TYPE", "MT_TOOL_PEN")
+        self.assertEqual(v, 1)
+
+    def test_event_value_to_value_invalid(self):
+        v = Libevdev.event_to_value("EV_ABS", "ABS_X", "foo")
+        self.assertIsNone(v)
+
 
 class TestLibevdevDevice(unittest.TestCase):
 
