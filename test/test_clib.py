@@ -41,6 +41,17 @@ class TestNameConversion(unittest.TestCase):
         with self.assertRaises(ctypes.ArgumentError):
             name = Libevdev.property_to_name("foo")
 
+    def test_prop_to_value(self):
+        value = Libevdev.property_to_value("INPUT_PROP_POINTER")
+        self.assertEqual(value, 0)
+
+        value = Libevdev.property_to_value("INPUT_PROP_DIRECT")
+        self.assertEqual(value, 1)
+
+    def test_prop_to_value_invalid(self):
+        name = Libevdev.property_to_value("foo")
+        self.assertIsNone(name)
+
     def test_type_to_name(self):
         name = Libevdev.event_to_name(1)
         self.assertEqual(name, "EV_KEY")
