@@ -314,16 +314,20 @@ class TestRealDevice(unittest.TestCase):
         self.assertTrue(dev.has_event("EV_SYN", "SYN_REPORT"))
 
         type_supported = -1
-        for i in range(1, 5):
-            if dev.has_event(i):
-                type_supported = i
+        max_code = -1
+        for t in range(1, 5):
+            if dev.has_event(t):
+                type_supported = t
+                max_code = Libevdev.type_max(t)
+                if max is None:
+                    continue
                 break
 
         self.assertGreater(type_supported, 0)
 
         codes_supported = 0
-        for i in range(150):
-            if dev.has_event(type_supported, i):
+        for c in range(max_code + 1):
+            if dev.has_event(type_supported, c):
                 codes_supported += 1
 
         self.assertGreater(codes_supported, 0)
