@@ -1,7 +1,61 @@
 # vim: set expandtab shiftwidth=2 tabstop=8 textwidth=0:
 
+.templates_sha: &templates_sha 2469555cd0a6b621b988e100ddd746c2ad0cdd1d
+
+include:
+  - project: 'freedesktop/ci-templates'
+    ref: *templates_sha
+    file: '/templates/fedora.yml'
+
+
 variables:
+  FDO_UPSTREAM_REPO: 'libevdev/python-libevdev'
   ARCH_PKGS: 'flake8'
+
+
+stages:
+  - prep
+  - test
+
+.distro-defaults:
+  variables:
+    FDO_DISTRIBUTION_VERSION: 31
+    FDO_DISTRIBUTION_TAG: 'qemu-2020-03-11.0'
+
+qemu-prep:
+  extends:
+  - .fdo.qemu-ifnot-exists@fedora
+  - .distro-defaults
+  stage: prep
+  variables:
+    FDO_DISTRIBUTION_PACKAGES: 'git python3 python3-pytest libevdev'
+    GIT_STRATEGY: none
+  allow_failure: true
+
+pytest:
+  extends:
+    - .fdo.distribution_image@fedora
+    - .distro-defaults
+  stage: test
+  needs:
+    - qemu-prep
+  script:
+    - /app/start_vm.sh
+    - "scp -P 5555 -r $PWD localhost:"
+    # We must not exit our script until VM cleanup is complete
+    - set +e
+    - ssh localhost -p 5555 "cd $CI_PROJECT_NAME ; pytest --junit-xml=results.xml" && touch .success
+    - scp -P 5555 -r localhost:$CI_PROJECT_NAME/results.xml .
+    - ssh localhost -p 5555 halt
+    - sleep 2
+    - pkill qemu
+    # re-enable failures to fail the job
+    - set -e
+    - test -e .success || exit 1
+  artifacts:
+    reports:
+      junit: results.xml
+
 
 .default_setup:
   image: archlinux/base
@@ -12,10 +66,12 @@ variables:
 
 flake:
   extends: .default_setup
+  stage: test
   script:
     - python3 setup.py flake8
 
 install:
   extends: .default_setup
+  stage: test
   script:
     - python3 setup.py install
