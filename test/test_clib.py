@@ -2,6 +2,7 @@ import os
 import unittest
 import ctypes
 from libevdev._clib import Libevdev, UinputDevice
+from pathlib import Path
 
 # Note: these tests test for the correct functioning of the python bindings,
 # not of libevdev underneath. Some ranges are hardcoded for simplicity, e.g.
@@ -11,6 +12,10 @@ from libevdev._clib import Libevdev, UinputDevice
 
 def is_root():
     return os.getuid() == 0
+
+
+def has_event_devices():
+    return list(Path('/dev/input/').glob('event*'))
 
 
 class TestNameConversion(unittest.TestCase):
@@ -225,6 +230,7 @@ class TestLibevdevDevice(unittest.TestCase):
         self.assertEqual(id["version"], 5)
 
 
+@unittest.skipUnless(has_event_devices(), 'Local event devices required')
 class TestRealDevice(unittest.TestCase):
     """
     Tests various things against /dev/input/event3 which is usually the
@@ -492,6 +498,7 @@ class TestAbsDevice(unittest.TestCase):
         self.assertTrue(dev.has_property("INPUT_PROP_ACCELEROMETER"))
 
 
+@unittest.skipUnless(has_event_devices(), 'Local event devices required')
 class TestMTDevice(unittest.TestCase):
     """
     Tests various things against the first MT device found.
@@ -530,6 +537,7 @@ class TestMTDevice(unittest.TestCase):
 
     @unittest.skipUnless(is_root(), 'Test requires root')
     def test_slot_value(self):
+
         dev = Libevdev(self.fd)
         a = dev.absinfo("ABS_MT_POSITION_X")
         v = dev.slot_value(dev.current_slot, "ABS_MT_POSITION_X")
