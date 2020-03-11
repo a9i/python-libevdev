@@ -380,7 +380,9 @@ class TestAbsDevice(unittest.TestCase):
                 # Not all eventX nodes are guaranteed to exist
                 pass
 
-        self.assertIsNotNone(want_fd)
+        if want_fd is None:
+            self.skipTest('No abs device available')
+
         self.fd = want_fd
 
     def tearDown(self):
@@ -519,7 +521,8 @@ class TestMTDevice(unittest.TestCase):
                 # Not all eventX nodes are guaranteed to exist
                 pass
 
-        self.assertIsNotNone(want_fd)
+        if want_fd is None:
+            self.skipTest('No MT device available')
         self.fd = want_fd
 
     def tearDown(self):
