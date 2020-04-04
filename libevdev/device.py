@@ -284,14 +284,27 @@ class Device(object):
     @property
     def id(self):
         """
-        :returns: A dict with the keys 'bustype', 'vendor', 'product', 'version'.
+        :returns: A dict with the keys ``'bustype'``, ``'vendor'``,
+                  ``'product'``, ``'version'``.
 
         When used as a setter, only existing keys are applied to the
         device. For example, to update the product ID only::
 
                 ctx = Device()
-                id["property"] = 1234
-                ctx.id = id
+                ids = {'product' : 1234}
+                ctx.id = ids
+
+        You must assign a new dictionary to ``id``. Technical limitations
+        prohibit accessing the ``id`` dictionary itself for write access.
+        See this example: ::
+
+                $ ctx = Device()
+                $ ctx.id['vendor'] = 1234
+                $ print(ctx.id['vendor'])
+                0
+                $ ctx.id = {'vendor': 1234}
+                $ print(ctx.id['vendor'])
+                1234
 
         """
         return self._libevdev.id
