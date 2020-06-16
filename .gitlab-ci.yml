@@ -22,6 +22,44 @@ stages:
     FDO_DISTRIBUTION_VERSION: 31
     FDO_DISTRIBUTION_TAG: 'qemu-2020-03-11.0'
 
+#
+# Verify that commit messages are as expected, signed-off, etc.
+#
+
+check-commit:
+  image: golang:alpine
+  stage: prep
+  before_script:
+    - apk add python3 py-pip git
+    - pip3 install git+http://gitlab.freedesktop.org/freedesktop/ci-templates
+  script:
+    - ci-fairy check-commits --signed-off-by --junit-xml=results.xml
+  except:
+    - master@libevdev/python-libevdev
+  variables:
+    GIT_DEPTH: 100
+  artifacts:
+    reports:
+      junit: results.xml
+
+#
+# Verify that the merge request has the allow-collaboration checkbox ticked
+#
+
+check-merge-request:
+  image: golang:alpine
+  stage: prep
+  before_script:
+    - apk add python3 py-pip git
+    - pip3 install git+http://gitlab.freedesktop.org/freedesktop/ci-templates
+  script:
+    - ci-fairy check-merge-request --require-allow-collaboration --junit-xml=results.xml
+  artifacts:
+    when: on_failure
+    reports:
+      junit: results.xml
+  allow_failure: true
+
 qemu-prep:
   extends:
   - .fdo.qemu-ifnot-exists@fedora
