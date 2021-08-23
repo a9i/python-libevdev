@@ -1,11 +1,14 @@
 # vim: set expandtab shiftwidth=2 tabstop=8 textwidth=0:
 
-.templates_sha: &templates_sha 2469555cd0a6b621b988e100ddd746c2ad0cdd1d
+.templates_sha: &templates_sha 007f3e2fe2235328e77d3cd4ce007ab41cd9ce6c
 
 include:
   - project: 'freedesktop/ci-templates'
     ref: *templates_sha
     file: '/templates/fedora.yml'
+  - project: 'freedesktop/ci-templates'
+    ref: *templates_sha
+    file: '/templates/ci-fairy.yml'
 
 
 variables:
@@ -16,22 +19,28 @@ variables:
 stages:
   - prep
   - test
+  - deploy
 
-.distro-defaults:
+.fedora:
   variables:
-    FDO_DISTRIBUTION_VERSION: 31
-    FDO_DISTRIBUTION_TAG: 'qemu-2020-03-11.0'
+    FDO_DISTRIBUTION_VERSION: 34
+    FDO_DISTRIBUTION_TAG: 'qemu-2021-08-24.0'
+    FDO_DISTRIBUTION_PACKAGES: 'git python3 python3-pytest libevdev python3-flake8'
+
+.fedora-qemu:
+  extends:
+    .fedora
+  variables:
+    FDO_DISTRIBUTION_TAG: '2021-08-24.0'
 
 #
 # Verify that commit messages are as expected, signed-off, etc.
 #
 
 check-commit:
-  image: golang:alpine
+  extends:
+    - .fdo.ci-fairy
   stage: prep
-  before_script:
-    - apk add python3 py-pip git
-    - pip3 install git+http://gitlab.freedesktop.org/freedesktop/ci-templates
   script:
     - ci-fairy check-commits --signed-off-by --junit-xml=results.xml
   except:
@@ -47,11 +56,9 @@ check-commit:
 #
 
 check-merge-request:
-  image: golang:alpine
-  stage: prep
-  before_script:
-    - apk add python3 py-pip git
-    - pip3 install git+http://gitlab.freedesktop.org/freedesktop/ci-templates
+  extends:
+    - .fdo.ci-fairy
+  stage: deploy
   script:
     - ci-fairy check-merge-request --require-allow-collaboration --junit-xml=results.xml
   artifacts:
@@ -60,56 +67,61 @@ check-merge-request:
       junit: results.xml
   allow_failure: true
 
-qemu-prep:
+#
+# Prep one regular container for flake and setup.py, one qemu image for pytest
+#
+container-prep:
   extends:
-  - .fdo.qemu-ifnot-exists@fedora
-  - .distro-defaults
+  - .fedora
+  - .fdo.container-build@fedora
   stage: prep
   variables:
-    FDO_DISTRIBUTION_PACKAGES: 'git python3 python3-pytest libevdev'
     GIT_STRATEGY: none
-  allow_failure: true
+
+qemu-prep:
+  extends:
+  - .fedora-qemu
+  - .fdo.qemu-build@fedora
+  stage: prep
+  variables:
+    GIT_STRATEGY: none
 
 pytest:
   extends:
-    - .fdo.distribution_image@fedora
-    - .distro-defaults
+    - .fedora-qemu
+    - .fdo.distribution-image@fedora
   stage: test
   needs:
     - qemu-prep
   script:
-    - /app/start_vm.sh
-    - "scp -P 5555 -r $PWD localhost:"
+    - /app/vmctl start || (echo "Error - Failed to start the VM." && exit 1)
+    - "scp -r $PWD vm:"
     # We must not exit our script until VM cleanup is complete
     - set +e
-    - ssh localhost -p 5555 "cd $CI_PROJECT_NAME ; pytest --junit-xml=results.xml" && touch .success
-    - scp -P 5555 -r localhost:$CI_PROJECT_NAME/results.xml .
-    - ssh localhost -p 5555 halt
-    - sleep 2
-    - pkill qemu
-    # re-enable failures to fail the job
-    - set -e
+    - /app/vmctl exec "cd $CI_PROJECT_NAME ; pytest --junit-xml=results.xml" && touch .success || true
+    - scp -r vm:$CI_PROJECT_NAME/results.xml
+    - /app/vmctl stop
     - test -e .success || exit 1
   artifacts:
     reports:
       junit: results.xml
 
-
-.default_setup:
-  image: archlinux/base
-  before_script:
-    - pacman -S --refresh
-    - pacman -S --sysupgrade --noconfirm
-    - pacman -S --noconfirm $ARCH_PKGS
-
 flake:
-  extends: .default_setup
+  extends:
+    - .fedora
+    - .fdo.distribution-image@fedora
   stage: test
+  needs:
+    - container-prep
   script:
     - python3 setup.py flake8
 
 install:
-  extends: .default_setup
+  extends:
+    - .fedora
+    - .fdo.distribution-image@fedora
   stage: test
+  needs:
+    - container-prep
   script:
     - python3 setup.py install
