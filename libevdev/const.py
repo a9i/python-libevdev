@@ -65,6 +65,9 @@ class EvdevBit:
     def __lt__(self, other):
         return self.value < other.value
 
+    def __int__(self):
+        return self.value
+
 
 class EventCode(EvdevBit):
     """
@@ -81,13 +84,16 @@ class EventCode(EvdevBit):
         ABS_X:0
         >>> print(libevdev.EV_ABS.ABS_Y)
         ABS_X:1
-        >>> code = libevdev.EV_REL.REL_X
+        >>> code = libevdev.EV_REL.REL_Y
         >>> print(code.type)
         EV_REL:2
+        >>> int(code)
+        1
 
     .. attribute:: value
 
-        The numeric value of the event code
+        The numeric value of the event code. This value is also returned when
+        the object is converted to ``int``.
 
     .. attribute:: name
 
@@ -140,6 +146,8 @@ class EventType(EvdevBit):
         EV_ABS:3
         >>> print(libevdev.EV_ABS.ABS_X)
         ABS_X:0
+        >>> print(int(libevdev.EV_ABS.ABS_Y))
+        1
         >>> print(libevdev.EV_ABS.max)
         63
         >>> print(libevdev.EV_ABS.ABS_MAX)
@@ -153,7 +161,8 @@ class EventType(EvdevBit):
 
     .. attribute:: value
 
-        The numeric value of the event type
+        The numeric value of the event type. This value is also returned when
+        the object is converted to ``int``.
 
     .. attribute:: name
 
@@ -173,6 +182,9 @@ class EventType(EvdevBit):
         assert isinstance(other, EventType)
         return self.value == other.value
 
+    def __int__(self):
+        return self.value
+
 
 class InputProperty(EvdevBit):
     """
@@ -186,11 +198,13 @@ class InputProperty(EvdevBit):
 
         >>> print(libevdev.INPUT_PROP_DIRECT)
         INPUT_PROP_DIRECT:1
-
+        >> int(libevdev.INPUT_PROP_DIRECT)
+        1
 
     .. attribute:: value
 
-        The numeric value of the property
+        The numeric value of the property. This value is also returned when
+        the object is converted to ``int``.
 
     .. attribute:: name
 

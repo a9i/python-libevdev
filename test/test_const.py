@@ -55,6 +55,12 @@ class TestEventBits(unittest.TestCase):
         self.assertNotEqual(libevdev.EV_REL.REL_X, libevdev.EV_REL)
         self.assertNotEqual(libevdev.EV_ABS.ABS_X, libevdev.EV_ABS)
 
+    def test_int_conversion(self):
+        self.assertEqual(int(libevdev.EV_REL.REL_X), 0)
+        self.assertEqual(int(libevdev.EV_KEY.KEY_ESC), 1)
+        self.assertEqual(int(libevdev.EV_KEY), 0x1)
+        self.assertEqual(int(libevdev.INPUT_PROP_SEMI_MT), 3)
+
     def test_evbit(self):
         self.assertEqual(evbit(0, 0), libevdev.EV_SYN.SYN_REPORT)
         self.assertEqual(evbit(1, 30), libevdev.EV_KEY.KEY_A)
