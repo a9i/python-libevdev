@@ -49,14 +49,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'libevdev Python wrapper'
-copyright = u'2016-2017, Red Hat Inc. '
+copyright = u'2016-2022, Red Hat Inc. '
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '0.9'
+version = '0.10'
 # The full version, including alpha/beta/rc tags.
 release = version
 
