@@ -34,7 +34,7 @@ stages:
     FDO_DISTRIBUTION_TAG: '2021-08-24.0'
 
 #
-# Verify that commit messages are as expected, signed-off, etc.
+# Verify that commit messages are as expected, etc.
 #
 
 check-commit:
@@ -42,7 +42,7 @@ check-commit:
     - .fdo.ci-fairy
   stage: prep
   script:
-    - ci-fairy check-commits --signed-off-by --junit-xml=results.xml
+    - ci-fairy check-commits --junit-xml=results.xml
   except:
     - master@libevdev/python-libevdev
   variables:
